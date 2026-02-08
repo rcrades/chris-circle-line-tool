@@ -171,9 +171,33 @@ export function ChatPanel({
       {/* messages */}
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
         {messages.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-8">
-            Ask me anything about circle geometry, or tell me to add/change the circle and line.
-          </p>
+          <div className="flex flex-col items-center gap-4 py-8">
+            <p className="text-xs text-muted-foreground text-center">
+              Try one of these, or ask your own question.
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {[
+                "Draw a circle with diameter 250",
+                "Add a chord of length 180 at 45 degrees",
+                "What is the area of the circle?",
+                "Make the circle twice as big",
+                "Remove the line",
+                "Set diameter to 400 and add a 300px chord",
+              ].map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => {
+                    sendMessage({ text: prompt })
+                  }}
+                  disabled={isLoading}
+                  className="text-xs px-3 py-1.5 rounded-full border border-border bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 text-left"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
         {messages.map((message) => (
           <div

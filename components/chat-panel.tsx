@@ -2,7 +2,10 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useChat } from "@ai-sdk/react"
-import { DefaultChatTransport } from "ai"
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithToolCalls,
+} from "ai"
 import { Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -20,33 +23,109 @@ const MODELS = [
   { value: "anthropic/claude-haiku-3-5", label: "Haiku 3.5", tier: "cheap" },
 ] as const
 
-export function ChatPanel() {
+export interface GeometryCallbacks {
+  onSetCircle: (diameter: number) => void
+  onSetLine: (length: number, angle: number | null) => void
+  onRemoveCircle: () => void
+  onRemoveLine: () => void
+  geometryState: {
+    diameter: number | null
+    chordLength: number | null
+    chordAngle: number
+  }
+}
+
+export function ChatPanel({
+  onSetCircle,
+  onSetLine,
+  onRemoveCircle,
+  onRemoveLine,
+  geometryState,
+}: GeometryCallbacks) {
   const [input, setInput] = useState("")
   const [model, setModel] = useState<string>(MODELS[0].value)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Store callbacks in refs so the onToolCall closure always has the latest
+  const callbacksRef = useRef({ onSetCircle, onSetLine, onRemoveCircle, onRemoveLine })
+  useEffect(() => {
+    callbacksRef.current = { onSetCircle, onSetLine, onRemoveCircle, onRemoveLine }
+  }, [onSetCircle, onSetLine, onRemoveCircle, onRemoveLine])
+
+  // Store geometryState in ref for the transport closure
+  const geoRef = useRef(geometryState)
+  useEffect(() => {
+    geoRef.current = geometryState
+  }, [geometryState])
 
   const transport = useRef(
     new DefaultChatTransport({
       api: "/api/chat",
       prepareSendMessagesRequest: ({ id, messages }) => ({
-        body: { id, messages, model },
+        body: { id, messages, model, geometryState: geoRef.current },
       }),
     })
   )
 
-  // Rebuild transport when model changes so the body closure captures the new model
   useEffect(() => {
     transport.current = new DefaultChatTransport({
       api: "/api/chat",
       prepareSendMessagesRequest: ({ id, messages }) => ({
-        body: { id, messages, model },
+        body: { id, messages, model, geometryState: geoRef.current },
       }),
     })
   }, [model])
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, addToolOutput, status } = useChat({
     get transport() {
       return transport.current
+    },
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+
+    onToolCall({ toolCall }) {
+      if (toolCall.dynamic) return
+
+      const cbs = callbacksRef.current
+      const geo = geoRef.current
+
+      if (toolCall.toolName === "setCircle") {
+        const { diameter } = toolCall.input as { diameter: number }
+        cbs.onSetCircle(diameter)
+        addToolOutput({
+          tool: "setCircle",
+          toolCallId: toolCall.toolCallId,
+          output: { ok: true, diameter },
+        })
+      }
+
+      if (toolCall.toolName === "setLine") {
+        const { length, angle } = toolCall.input as { length: number; angle: number | null }
+        const resolvedAngle = angle ?? geo.chordAngle
+        cbs.onSetLine(length, angle)
+        addToolOutput({
+          tool: "setLine",
+          toolCallId: toolCall.toolCallId,
+          output: { ok: true, length, angle: resolvedAngle },
+        })
+      }
+
+      if (toolCall.toolName === "removeCircle") {
+        cbs.onRemoveCircle()
+        addToolOutput({
+          tool: "removeCircle",
+          toolCallId: toolCall.toolCallId,
+          output: { ok: true },
+        })
+      }
+
+      if (toolCall.toolName === "removeLine") {
+        cbs.onRemoveLine()
+        addToolOutput({
+          tool: "removeLine",
+          toolCallId: toolCall.toolCallId,
+          output: { ok: true },
+        })
+      }
     },
   })
 
@@ -82,9 +161,7 @@ export function ChatPanel() {
             {MODELS.map((m) => (
               <SelectItem key={m.value} value={m.value} className="text-xs">
                 <span>{m.label}</span>
-                <span className="ml-2 text-muted-foreground">
-                  ({m.tier})
-                </span>
+                <span className="ml-2 text-muted-foreground">({m.tier})</span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -95,7 +172,7 @@ export function ChatPanel() {
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
         {messages.length === 0 && (
           <p className="text-xs text-muted-foreground text-center py-8">
-            Ask me anything about circle geometry.
+            Ask me anything about circle geometry, or tell me to add/change the circle and line.
           </p>
         )}
         {messages.map((message) => (
@@ -115,6 +192,28 @@ export function ChatPanel() {
                   </span>
                 )
               }
+              // Show tool call confirmations inline
+              if (
+                part.type === "tool-setCircle" ||
+                part.type === "tool-setLine" ||
+                part.type === "tool-removeCircle" ||
+                part.type === "tool-removeLine"
+              ) {
+                if (part.state === "output-available") {
+                  return (
+                    <span key={i} className="text-xs italic text-muted-foreground block mt-1">
+                      Applied to canvas.
+                    </span>
+                  )
+                }
+                if (part.state === "input-available") {
+                  return (
+                    <span key={i} className="text-xs italic text-muted-foreground block mt-1">
+                      Updating canvas...
+                    </span>
+                  )
+                }
+              }
               return null
             })}
           </div>
@@ -133,12 +232,17 @@ export function ChatPanel() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask about circles..."
+          placeholder="e.g. Draw a circle with diameter 300..."
           className="min-h-[40px] max-h-32 resize-none text-sm"
           rows={1}
           disabled={isLoading}
         />
-        <Button type="submit" size="icon" className="shrink-0 h-10 w-10" disabled={isLoading || !input.trim()}>
+        <Button
+          type="submit"
+          size="icon"
+          className="shrink-0 h-10 w-10"
+          disabled={isLoading || !input.trim()}
+        >
           <Send className="h-4 w-4" />
           <span className="sr-only">Send message</span>
         </Button>

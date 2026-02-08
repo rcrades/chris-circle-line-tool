@@ -106,7 +106,29 @@ export default function Page() {
           }`}
         >
           <div className="h-full p-4 flex flex-col">
-            <ChatPanel />
+            <ChatPanel
+              geometryState={{ diameter, chordLength, chordAngle }}
+              onSetCircle={(d) => {
+                setDiameter(d)
+                setDiameterInput(String(d))
+                if (chordLength && chordLength > d) {
+                  setChordLength(null)
+                }
+              }}
+              onSetLine={(length, angle) => {
+                setChordLength(length)
+                setChordInput(String(length))
+                if (angle !== null) setChordAngle(angle)
+              }}
+              onRemoveCircle={() => {
+                setDiameter(null)
+                setChordLength(null)
+                setChordAngle(30)
+              }}
+              onRemoveLine={() => {
+                setChordLength(null)
+              }}
+            />
           </div>
         </div>
 

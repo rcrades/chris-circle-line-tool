@@ -100,20 +100,24 @@ export default function Page() {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-53px)]">
-        {/* chat sidebar - left */}
+      <div className="relative h-[calc(100vh-53px)] overflow-hidden">
+        {/* chat sidebar - left, absolutely positioned */}
         <div
-          className={`border-r border-border flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
-            chatOpen ? "w-80 lg:w-96" : "w-0"
+          className={`absolute top-0 left-0 h-full w-80 lg:w-96 border-r border-border flex flex-col transition-transform duration-300 ease-in-out z-10 bg-background ${
+            chatOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="w-80 lg:w-96 h-full p-4 flex flex-col">
+          <div className="h-full p-4 flex flex-col">
             <ChatPanel />
           </div>
         </div>
 
-        {/* canvas area */}
-        <div className="flex-1 flex flex-col lg:flex-row min-w-0">
+        {/* main content - shifts right when chat is open */}
+        <div
+          className={`h-full flex flex-col lg:flex-row transition-all duration-300 ease-in-out ${
+            chatOpen ? "ml-80 lg:ml-96" : "ml-0"
+          }`}
+        >
           <div className="flex-1 p-4 min-w-0">
             <CircleCanvas diameter={diameter} chordLength={chordLength} chordAngle={chordAngle} />
           </div>

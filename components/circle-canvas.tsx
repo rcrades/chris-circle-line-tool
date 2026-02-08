@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useCallback } from "react"
 import { drawCircle } from "@/lib/draw-circle"
 
 interface CircleCanvasProps {
@@ -12,7 +12,7 @@ interface CircleCanvasProps {
 export function CircleCanvas({ diameter, chordLength, chordAngle }: CircleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  useEffect(() => {
+  const paint = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -42,6 +42,23 @@ export function CircleCanvas({ diameter, chordLength, chordAngle }: CircleCanvas
       ctx.fillText("Add a circle to get started", rect.width / 2, rect.height / 2)
     }
   }, [diameter, chordLength, chordAngle])
+
+  // redraw on prop changes
+  useEffect(() => {
+    paint()
+  }, [paint])
+
+  // redraw on container resize (e.g. chat sidebar opening)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const observer = new ResizeObserver(() => {
+      paint()
+    })
+    observer.observe(canvas)
+    return () => observer.disconnect()
+  }, [paint])
 
   return (
     <canvas

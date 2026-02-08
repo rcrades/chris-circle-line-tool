@@ -1,5 +1,7 @@
 "use client"
 
+import { computeGeometry } from "@/lib/geometry"
+
 interface GeometryDataProps {
   diameter: number | null
   chordLength: number | null
@@ -27,28 +29,7 @@ export function GeometryData({ diameter, chordLength, chordAngle }: GeometryData
     )
   }
 
-  const radius = diameter / 2
-  const circumference = Math.PI * diameter
-  const area = Math.PI * radius * radius
-
-  // chord-related computations
-  let sagitta: number | null = null
-  let centralAngle: number | null = null
-  let arcLength: number | null = null
-  let chordDistFromCenter: number | null = null
-  let sectorArea: number | null = null
-  let segmentArea: number | null = null
-
-  if (chordLength && chordLength > 0 && chordLength <= diameter) {
-    const halfChord = chordLength / 2
-    chordDistFromCenter = Math.sqrt(radius * radius - halfChord * halfChord)
-    sagitta = radius - chordDistFromCenter
-    centralAngle = 2 * Math.asin(halfChord / radius) * (180 / Math.PI)
-    const centralAngleRad = (centralAngle * Math.PI) / 180
-    arcLength = radius * centralAngleRad
-    sectorArea = 0.5 * radius * radius * centralAngleRad
-    segmentArea = sectorArea - 0.5 * chordLength * chordDistFromCenter
-  }
+  const g = computeGeometry(diameter, chordLength, chordAngle)
 
   const fmt = (n: number) => {
     if (Number.isInteger(n)) return n.toString()
@@ -62,45 +43,33 @@ export function GeometryData({ diameter, chordLength, chordAngle }: GeometryData
           Circle
         </h3>
         <div className="flex flex-col">
-          <Row label="Diameter" value={fmt(diameter)} unit="px" />
-          <Row label="Radius" value={fmt(radius)} unit="px" />
-          <Row label="Circumference" value={fmt(circumference)} unit="px" />
-          <Row label="Area" value={fmt(area)} unit="px\u00B2" />
+          <Row label="Diameter" value={fmt(g.diameter)} unit="px" />
+          <Row label="Radius" value={fmt(g.radius)} unit="px" />
+          <Row label="Circumference" value={fmt(g.circumference)} unit="px" />
+          <Row label="Area" value={fmt(g.area)} unit="px²" />
         </div>
       </div>
 
-      {chordLength && chordLength > 0 && (
+      {g.chord && (
         <div>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
             Chord / Line
           </h3>
           <div className="flex flex-col">
-            <Row label="Chord length" value={fmt(chordLength)} unit="px" />
-            <Row label="Rotation angle" value={`${chordAngle}\u00B0`} />
-            {chordLength > diameter ? (
+            <Row label="Chord length" value={fmt(g.chord.length)} unit="px" />
+            <Row label="Rotation angle" value={`${g.chord.angle}°`} />
+            {chordLength && chordLength > diameter ? (
               <p className="text-sm text-destructive py-2">
                 Chord exceeds diameter. Must be &le; {diameter}.
               </p>
             ) : (
               <>
-                {chordDistFromCenter !== null && (
-                  <Row label="Distance from center" value={fmt(chordDistFromCenter)} unit="px" />
-                )}
-                {sagitta !== null && (
-                  <Row label="Sagitta" value={fmt(sagitta)} unit="px" />
-                )}
-                {centralAngle !== null && (
-                  <Row label="Central angle" value={`${fmt(centralAngle)}\u00B0`} />
-                )}
-                {arcLength !== null && (
-                  <Row label="Arc length (minor)" value={fmt(arcLength)} unit="px" />
-                )}
-                {sectorArea !== null && (
-                  <Row label="Sector area" value={fmt(sectorArea)} unit="px\u00B2" />
-                )}
-                {segmentArea !== null && (
-                  <Row label="Segment area" value={fmt(segmentArea)} unit="px\u00B2" />
-                )}
+                <Row label="Distance from center" value={fmt(g.chord.distanceFromCenter)} unit="px" />
+                <Row label="Sagitta" value={fmt(g.chord.sagitta)} unit="px" />
+                <Row label="Central angle" value={`${fmt(g.chord.centralAngle)}°`} />
+                <Row label="Arc length (minor)" value={fmt(g.chord.arcLength)} unit="px" />
+                <Row label="Sector area" value={fmt(g.chord.sectorArea)} unit="px²" />
+                <Row label="Segment area" value={fmt(g.chord.segmentArea)} unit="px²" />
               </>
             )}
           </div>

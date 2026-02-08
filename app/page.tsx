@@ -1,12 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import { Copy, Check, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { CircleCanvas } from "@/components/circle-canvas"
 import { GeometryData } from "@/components/geometry-data"
+import { ExportModal } from "@/components/export-modal"
+import { computeGeometry, geometryToJSON, geometryToCSV } from "@/lib/geometry"
 
 export default function Page() {
   const [diameter, setDiameter] = useState<number | null>(null)
@@ -17,8 +22,22 @@ export default function Page() {
   const [diameterInput, setDiameterInput] = useState("200")
   const [chordInput, setChordInput] = useState("140")
 
+  const [copyOpen, setCopyOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+
   const hasCircle = diameter !== null
   const hasChord = chordLength !== null
+
+  const geometry = hasCircle ? computeGeometry(diameter, chordLength, chordAngle) : null
+  const jsonPreview = geometry ? geometryToJSON(geometry) : ""
+  const csvPreview = geometry ? geometryToCSV(geometry) : ""
+
+  function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   function addCircle() {
     const d = Number(diameterInput)
@@ -47,11 +66,25 @@ export default function Page() {
       {/* header */}
       <header className="border-b border-border px-4 py-3 flex items-center justify-between">
         <h1 className="text-base font-semibold text-foreground">Circle Tool</h1>
-        {hasCircle && (
-          <Button variant="ghost" size="sm" onClick={reset} className="text-muted-foreground">
-            Reset
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {hasCircle && (
+            <Button variant="ghost" size="sm" onClick={() => setExportOpen(true)} className="text-muted-foreground">
+              <Download className="h-4 w-4 mr-1" />
+              Export
+            </Button>
+          )}
+          {hasCircle && (
+            <Button variant="ghost" size="sm" onClick={() => setCopyOpen(true)} className="text-muted-foreground">
+              <Copy className="h-4 w-4 mr-1" />
+              Copy
+            </Button>
+          )}
+          {hasCircle && (
+            <Button variant="ghost" size="sm" onClick={reset} className="text-muted-foreground">
+              Reset
+            </Button>
+          )}
+        </div>
       </header>
 
       <div className="flex flex-col lg:flex-row h-[calc(100vh-53px)]">
@@ -104,7 +137,13 @@ export default function Page() {
                     min={1}
                     max={diameter ?? undefined}
                     value={chordInput}
-                    onChange={(e) => setChordInput(e.target.value)}
+                    onChange={(e) => {
+                      setChordInput(e.target.value)
+                      if (hasChord) {
+                        const l = Number(e.target.value)
+                        if (l > 0) setChordLength(l)
+                      }
+                    }}
                     onKeyDown={(e) => e.key === "Enter" && addLine()}
                   />
                 </div>
@@ -114,18 +153,35 @@ export default function Page() {
               </div>
 
               {hasChord && (
-                <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs text-muted-foreground">
-                    Angle: {chordAngle}&deg;
-                  </Label>
-                  <Slider
-                    min={0}
-                    max={360}
-                    step={1}
-                    value={[chordAngle]}
-                    onValueChange={([v]) => setChordAngle(v)}
-                  />
-                </div>
+                <>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs text-muted-foreground">
+                      Length: {chordLength}
+                    </Label>
+                    <Slider
+                      min={1}
+                      max={diameter ?? 200}
+                      step={1}
+                      value={[chordLength ?? 1]}
+                      onValueChange={([v]) => {
+                        setChordLength(v)
+                        setChordInput(String(v))
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs text-muted-foreground">
+                      Angle: {chordAngle}&deg;
+                    </Label>
+                    <Slider
+                      min={0}
+                      max={360}
+                      step={1}
+                      value={[chordAngle]}
+                      onValueChange={([v]) => setChordAngle(v)}
+                    />
+                  </div>
+                </>
               )}
             </section>
           )}
@@ -136,6 +192,55 @@ export default function Page() {
           </section>
         </aside>
       </div>
+      {hasCircle && (
+        <ExportModal
+          open={exportOpen}
+          onOpenChange={setExportOpen}
+          diameter={diameter}
+          chordLength={chordLength}
+          chordAngle={chordAngle}
+        />
+      )}
+      <Dialog open={copyOpen} onOpenChange={setCopyOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Copy Data</DialogTitle>
+            <DialogDescription>Preview and copy geometry data as JSON or CSV.</DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="json" onValueChange={() => setCopied(false)}>
+            <div className="flex items-center justify-between">
+              <TabsList>
+                <TabsTrigger value="json">JSON</TabsTrigger>
+                <TabsTrigger value="csv">CSV</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="json">
+              <pre className="rounded-md border border-border bg-muted/50 p-3 text-xs font-mono overflow-auto max-h-64">
+                {jsonPreview}
+              </pre>
+              <Button
+                size="sm"
+                className="mt-3 w-full"
+                onClick={() => copyToClipboard(jsonPreview)}
+              >
+                {copied ? <><Check className="h-4 w-4 mr-1" /> Copied</> : <><Copy className="h-4 w-4 mr-1" /> Copy JSON</>}
+              </Button>
+            </TabsContent>
+            <TabsContent value="csv">
+              <pre className="rounded-md border border-border bg-muted/50 p-3 text-xs font-mono overflow-auto max-h-64">
+                {csvPreview}
+              </pre>
+              <Button
+                size="sm"
+                className="mt-3 w-full"
+                onClick={() => copyToClipboard(csvPreview)}
+              >
+                {copied ? <><Check className="h-4 w-4 mr-1" /> Copied</> : <><Copy className="h-4 w-4 mr-1" /> Copy CSV</>}
+              </Button>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </main>
   )
 }

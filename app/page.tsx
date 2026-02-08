@@ -67,7 +67,8 @@ export default function Page() {
     <main className="min-h-screen bg-background">
       {/* header */}
       <header className="border-b border-border px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <h1 className="text-base font-semibold text-foreground">Circle Tool</h1>
+        <div className="flex items-center gap-1">
           <Button
             variant={chatOpen ? "secondary" : "ghost"}
             size="sm"
@@ -77,9 +78,6 @@ export default function Page() {
             <MessageCircle className="h-4 w-4 mr-1" />
             <span className="hidden sm:inline">Chat</span>
           </Button>
-          <h1 className="text-base font-semibold text-foreground">Circle Tool</h1>
-        </div>
-        <div className="flex items-center gap-1">
           {hasCircle && (
             <Button variant="ghost" size="sm" onClick={() => setExportOpen(true)} className="text-muted-foreground">
               <Download className="h-4 w-4 mr-1" />

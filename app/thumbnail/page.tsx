@@ -1,7 +1,7 @@
 import { Thumbnail } from "@/components/brand/thumbnail"
 
-type Variant = "a" | "b" | "c" | "d"
-const VALID: Variant[] = ["a", "b", "c", "d"]
+type Variant = "a" | "b" | "c" | "d" | "e"
+const VALID: Variant[] = ["a", "b", "c", "d", "e"]
 
 export default async function ThumbnailPage({
   searchParams,

@@ -13,6 +13,52 @@ interface Variant {
 
 const VARIANTS: Variant[] = [
   {
+    id: "e",
+    label: "CAD Geometry Tool",
+    words: ["CAD", "GEOMETRY", "TOOL"],
+    elements: (
+      <>
+        {/* large circle with construction lines */}
+        <svg className="absolute -top-4 -left-4 opacity-20" width="200" height="200" viewBox="0 0 360 360">
+          <circle cx="180" cy="180" r="160" fill="none" stroke="hsl(210 80% 55%)" strokeWidth="1" />
+          <circle cx="180" cy="180" r="160" fill="none" stroke="hsl(210 80% 55%)" strokeWidth="0.5" strokeDasharray="8 4" />
+          <circle cx="180" cy="180" r="120" fill="none" stroke="hsl(210 80% 45%)" strokeWidth="0.5" strokeDasharray="4 8" />
+          <line x1="0" y1="180" x2="360" y2="180" stroke="hsl(210 80% 55%)" strokeWidth="0.5" strokeDasharray="6 6" />
+          <line x1="180" y1="0" x2="180" y2="360" stroke="hsl(210 80% 55%)" strokeWidth="0.5" strokeDasharray="6 6" />
+          <circle cx="180" cy="180" r="3" fill="hsl(210 80% 55%)" />
+        </svg>
+        {/* circle+chord bottom right */}
+        <svg className="absolute -bottom-2 -right-2 opacity-30 rotate-12" width="160" height="160" viewBox="0 0 280 280">
+          <circle cx="140" cy="140" r="120" fill="none" stroke="hsl(210 80% 60%)" strokeWidth="1.5" />
+          <line x1="36" y1="200" x2="244" y2="80" stroke="hsl(350 75% 55%)" strokeWidth="2" />
+          <line x1="140" y1="140" x2="118" y2="154" stroke="hsl(40 80% 55%)" strokeWidth="1" strokeDasharray="4 3" />
+          <circle cx="140" cy="140" r="2.5" fill="hsl(210 80% 60%)" />
+        </svg>
+        {/* data panel */}
+        <div className="absolute top-5 right-4 opacity-50">
+          <div className="bg-white/5 border border-white/15 rounded-lg p-2">
+            <div className="flex flex-col gap-0.5 text-[8px] font-mono">
+              <div className="flex justify-between gap-3">
+                <span className="text-white/40">diameter</span>
+                <span className="text-white/70 tabular-nums">400</span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-white/40">area</span>
+                <span className="text-white/70 tabular-nums">125663</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* tool call */}
+        <div className="absolute bottom-6 left-4 opacity-50">
+          <div className="bg-white/5 border border-white/15 rounded-md px-2 py-1">
+            <span className="text-[8px] font-mono text-white/60">setCircle(400)</span>
+          </div>
+        </div>
+      </>
+    ),
+  },
+  {
     id: "a",
     label: "Circle Tool",
     words: ["CIRCLE", "TOOL"],
@@ -155,7 +201,7 @@ export function ThumbnailCarousel() {
               <span
                 key={word}
                 className="font-mono font-black text-primary-foreground tracking-tighter leading-none"
-                style={{ fontSize: "clamp(2rem, 8vw, 5rem)" }}
+                style={{ fontSize: v.words.length > 2 ? "clamp(1.5rem, 6vw, 3.8rem)" : "clamp(2rem, 8vw, 5rem)" }}
               >
                 {word}
               </span>

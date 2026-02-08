@@ -2,8 +2,9 @@ import Link from "next/link"
 import { ChevronRight, ExternalLink } from "lucide-react"
 import { Thumbnail } from "@/components/brand/thumbnail"
 
-type Variant = "a" | "b" | "c" | "d" | "e"
+type Variant = "a" | "b" | "c" | "d" | "e" | "f"
 const VARIANTS: { id: Variant; label: string }[] = [
+  { id: "f", label: "Parametric Engine" },
   { id: "e", label: "CAD Geometry Tool" },
   { id: "a", label: "Circle Tool" },
   { id: "b", label: "AI Agent" },

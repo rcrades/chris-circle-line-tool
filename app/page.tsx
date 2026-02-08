@@ -1,16 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Copy, Check, Download } from "lucide-react"
+import { Copy, Check, Download, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { CircleCanvas } from "@/components/circle-canvas"
 import { GeometryData } from "@/components/geometry-data"
 import { ExportModal } from "@/components/export-modal"
+import { ChatPanel } from "@/components/chat-panel"
 import { computeGeometry, geometryToJSON, geometryToCSV } from "@/lib/geometry"
 
 export default function Page() {
@@ -24,6 +26,7 @@ export default function Page() {
 
   const [copyOpen, setCopyOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const hasCircle = diameter !== null
@@ -67,16 +70,20 @@ export default function Page() {
       <header className="border-b border-border px-4 py-3 flex items-center justify-between">
         <h1 className="text-base font-semibold text-foreground">Circle Tool</h1>
         <div className="flex items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setChatOpen(true)} className="text-muted-foreground">
+            <MessageCircle className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Chat</span>
+          </Button>
           {hasCircle && (
             <Button variant="ghost" size="sm" onClick={() => setExportOpen(true)} className="text-muted-foreground">
               <Download className="h-4 w-4 mr-1" />
-              Export
+              <span className="hidden sm:inline">Export</span>
             </Button>
           )}
           {hasCircle && (
             <Button variant="ghost" size="sm" onClick={() => setCopyOpen(true)} className="text-muted-foreground">
               <Copy className="h-4 w-4 mr-1" />
-              Copy
+              <span className="hidden sm:inline">Copy</span>
             </Button>
           )}
           {hasCircle && (
@@ -201,6 +208,17 @@ export default function Page() {
           chordAngle={chordAngle}
         />
       )}
+      <Sheet open={chatOpen} onOpenChange={setChatOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
+          <SheetHeader>
+            <SheetTitle>Chat</SheetTitle>
+            <SheetDescription>Ask about circle geometry</SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 overflow-hidden mt-2">
+            <ChatPanel />
+          </div>
+        </SheetContent>
+      </Sheet>
       <Dialog open={copyOpen} onOpenChange={setCopyOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>

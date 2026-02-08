@@ -23,12 +23,15 @@ const FEATURES = [
     label: "Geometry Engine",
     mini: (
       <div className="flex flex-col gap-0.5 text-[9px] font-mono">
-        {["Circumference", "Area", "Sagitta", "Arc Length"].map((k) => (
+        {[
+          { k: "Circumference", v: "628.3" },
+          { k: "Area", v: "31415.9" },
+          { k: "Sagitta", v: "13.4" },
+          { k: "Arc Length", v: "167.6" },
+        ].map(({ k, v }) => (
           <div key={k} className="flex justify-between">
             <span className="text-muted-foreground">{k}</span>
-            <span className="text-foreground tabular-nums">
-              {(Math.random() * 500).toFixed(1)}
-            </span>
+            <span className="text-foreground tabular-nums">{v}</span>
           </div>
         ))}
       </div>

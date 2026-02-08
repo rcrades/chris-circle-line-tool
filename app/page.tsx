@@ -111,20 +111,24 @@ export default function HomePage() {
       <FeatureTicker />
 
       {/* hero */}
-      <section className="px-4 py-8 md:py-12 max-w-4xl mx-auto text-center">
-        <h1 className="text-2xl md:text-4xl font-bold text-balance text-foreground leading-tight">
-          A circle geometry tool with an AI agent built in
-        </h1>
-        <p className="mt-2 text-muted-foreground text-sm md:text-base max-w-2xl mx-auto text-pretty">
-          Canvas rendering, live geometry computation, export, and natural-language control via Claude. Fork it and build on it.
-        </p>
-        <div className="mt-5 flex items-center justify-center gap-3">
-          <Link
-            href="/tool"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-5 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            Open the tool <ArrowRight className="h-4 w-4" />
-          </Link>
+      <section className="px-4 py-8 md:py-12 max-w-4xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl md:text-4xl font-bold text-balance text-foreground leading-tight">
+              A circle geometry tool with an AI agent built in
+            </h1>
+            <p className="text-muted-foreground text-sm md:text-base max-w-2xl text-pretty">
+              Canvas rendering, live geometry computation, export, and natural-language control via Claude. Fork it and build on it.
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <Link
+              href="/tool"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-5 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+            >
+              Open the tool <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 

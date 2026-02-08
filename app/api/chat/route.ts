@@ -10,7 +10,7 @@ export const maxDuration = 60
 export async function POST(req: Request) {
   const {
     messages,
-    model = "anthropic/claude-opus-4-0",
+    model = "anthropic/claude-opus-4.5",
   }: { messages: UIMessage[]; model?: string } = await req.json()
 
   const result = streamText({

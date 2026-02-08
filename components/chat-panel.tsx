@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select"
 
 const MODELS = [
-  { value: "anthropic/claude-opus-4-0", label: "Claude Opus 4", tier: "best" },
-  { value: "anthropic/claude-sonnet-4", label: "Claude Sonnet 4", tier: "mid" },
-  { value: "anthropic/claude-haiku-3-5", label: "Claude Haiku 3.5", tier: "cheap" },
+  { value: "anthropic/claude-opus-4.5", label: "Opus 4.5", tier: "best" },
+  { value: "anthropic/claude-sonnet-4", label: "Sonnet 4", tier: "mid" },
+  { value: "anthropic/claude-haiku-3-5", label: "Haiku 3.5", tier: "cheap" },
 ] as const
 
 export function ChatPanel() {

@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { CircleCanvas } from "@/components/circle-canvas"
 import { GeometryData } from "@/components/geometry-data"
@@ -68,12 +67,19 @@ export default function Page() {
     <main className="min-h-screen bg-background">
       {/* header */}
       <header className="border-b border-border px-4 py-3 flex items-center justify-between">
-        <h1 className="text-base font-semibold text-foreground">Circle Tool</h1>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setChatOpen(true)} className="text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <Button
+            variant={chatOpen ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setChatOpen(!chatOpen)}
+            className={chatOpen ? "" : "text-muted-foreground"}
+          >
             <MessageCircle className="h-4 w-4 mr-1" />
             <span className="hidden sm:inline">Chat</span>
           </Button>
+          <h1 className="text-base font-semibold text-foreground">Circle Tool</h1>
+        </div>
+        <div className="flex items-center gap-1">
           {hasCircle && (
             <Button variant="ghost" size="sm" onClick={() => setExportOpen(true)} className="text-muted-foreground">
               <Download className="h-4 w-4 mr-1" />
@@ -94,11 +100,23 @@ export default function Page() {
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-53px)]">
-        {/* canvas area */}
-        <div className="flex-1 p-4">
-          <CircleCanvas diameter={diameter} chordLength={chordLength} chordAngle={chordAngle} />
+      <div className="flex h-[calc(100vh-53px)]">
+        {/* chat sidebar - left */}
+        <div
+          className={`border-r border-border flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+            chatOpen ? "w-80 lg:w-96" : "w-0"
+          }`}
+        >
+          <div className="w-80 lg:w-96 h-full p-4 flex flex-col">
+            <ChatPanel />
+          </div>
         </div>
+
+        {/* canvas area */}
+        <div className="flex-1 flex flex-col lg:flex-row min-w-0">
+          <div className="flex-1 p-4 min-w-0">
+            <CircleCanvas diameter={diameter} chordLength={chordLength} chordAngle={chordAngle} />
+          </div>
 
         {/* sidebar */}
         <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border p-4 flex flex-col gap-6 overflow-y-auto">
@@ -198,6 +216,7 @@ export default function Page() {
             <GeometryData diameter={diameter} chordLength={chordLength} chordAngle={chordAngle} />
           </section>
         </aside>
+        </div>
       </div>
       {hasCircle && (
         <ExportModal
@@ -208,17 +227,6 @@ export default function Page() {
           chordAngle={chordAngle}
         />
       )}
-      <Sheet open={chatOpen} onOpenChange={setChatOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
-          <SheetHeader>
-            <SheetTitle>Chat</SheetTitle>
-            <SheetDescription>Ask about circle geometry</SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 overflow-hidden mt-2">
-            <ChatPanel />
-          </div>
-        </SheetContent>
-      </Sheet>
       <Dialog open={copyOpen} onOpenChange={setCopyOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>

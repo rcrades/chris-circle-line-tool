@@ -1,296 +1,239 @@
-"use client"
+import Link from "next/link"
+import {
+  ArrowRight,
+  Circle,
+  MessageCircle,
+  Download,
+  Copy,
+  SlidersHorizontal,
+  Cpu,
+  Palette,
+  Maximize,
+  Wrench,
+  Image,
+  FileText,
+  Star,
+  Smartphone,
+} from "lucide-react"
+import { FeatureTicker } from "@/components/home/feature-ticker"
+import { ThumbnailCarousel } from "@/components/home/thumbnail-carousel"
 
-import { useState } from "react"
-import { Copy, Check, Download, MessageCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { CircleCanvas } from "@/components/circle-canvas"
-import { GeometryData } from "@/components/geometry-data"
-import { ExportModal } from "@/components/export-modal"
-import { ChatPanel } from "@/components/chat-panel"
-import { computeGeometry, geometryToJSON, geometryToCSV } from "@/lib/geometry"
+const FEATURES = [
+  {
+    icon: Circle,
+    title: "Canvas Renderer",
+    description:
+      "HTML5 Canvas with HiDPI support, configurable dot grid, circle and chord drawing with labeled measurements. Redraws on resize.",
+    href: "/tool",
+  },
+  {
+    icon: Cpu,
+    title: "Geometry Engine",
+    description:
+      "Computes circumference, area, chord distance from center, sagitta, central angle, arc length, sector area, and segment area in real time.",
+    href: "/tool",
+  },
+  {
+    icon: MessageCircle,
+    title: "AI Chatbot",
+    description:
+      "Claude Opus 4.5 via Vercel AI Gateway. Natural language control of the canvas through tool calling. Ask it to draw, resize, or remove shapes.",
+    href: "/tool",
+  },
+  {
+    icon: Wrench,
+    title: "Tool Calling",
+    description:
+      "Four client-side tools (setCircle, setLine, removeCircle, removeLine) wired via AI SDK 6. The LLM reads current geometry state and acts on it.",
+    href: "/tool",
+  },
+  {
+    icon: SlidersHorizontal,
+    title: "Chord Sliders",
+    description:
+      "Adjust chord length and rotation angle with real-time sliders. Values sync between inputs, sliders, and AI commands.",
+    href: "/tool",
+  },
+  {
+    icon: Download,
+    title: "Export Image",
+    description:
+      "Download as JPG (configurable quality and background color) or PNG (with transparency). Scale from 1x to 4x. Toggle grid and labels.",
+    href: "/tool",
+  },
+  {
+    icon: Copy,
+    title: "Copy Data",
+    description:
+      "Copy all computed geometry as JSON or CSV with a preview modal. One-click clipboard copy.",
+    href: "/tool",
+  },
+  {
+    icon: Maximize,
+    title: "Responsive Layout",
+    description:
+      "Chat sidebar slides in from the left without squeezing the canvas. Right sidebar stacks below on mobile. ResizeObserver keeps the canvas sharp.",
+    href: "/tool",
+  },
+  {
+    icon: Palette,
+    title: "Design Tokens",
+    description:
+      "Full light/dark theme via CSS custom properties. All colors, radii, and sidebar tokens are configurable in globals.css.",
+    href: "/tool",
+  },
+]
 
-export default function Page() {
-  const [diameter, setDiameter] = useState<number | null>(null)
-  const [chordLength, setChordLength] = useState<number | null>(null)
-  const [chordAngle, setChordAngle] = useState(30)
+const DEPS = [
+  "Next.js 16",
+  "React 19",
+  "Tailwind CSS",
+  "shadcn/ui",
+  "AI SDK 6",
+  "Vercel AI Gateway",
+  "Lucide Icons",
+  "Recharts",
+  "Zod",
+  "TypeScript",
+]
 
-  // temp inputs for the "add" flows
-  const [diameterInput, setDiameterInput] = useState("200")
-  const [chordInput, setChordInput] = useState("140")
+const BRAND_ASSETS = [
+  { label: "Thumbnail", href: "/thumbnail?v=a" },
+  { label: "OG Image", href: "/thumbnail?v=a" },
+  { label: "Apple Touch Icon", href: "/brand-assets" },
+  { label: "Favicon", href: "/brand-assets" },
+]
 
-  const [copyOpen, setCopyOpen] = useState(false)
-  const [exportOpen, setExportOpen] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-
-  const hasCircle = diameter !== null
-  const hasChord = chordLength !== null
-
-  const geometry = hasCircle ? computeGeometry(diameter, chordLength, chordAngle) : null
-  const jsonPreview = geometry ? geometryToJSON(geometry) : ""
-  const csvPreview = geometry ? geometryToCSV(geometry) : ""
-
-  function copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  function addCircle() {
-    const d = Number(diameterInput)
-    if (d > 0) {
-      setDiameter(d)
-      // reset chord if it no longer fits
-      if (chordLength && chordLength > d) {
-        setChordLength(null)
-      }
-    }
-  }
-
-  function addLine() {
-    const l = Number(chordInput)
-    if (l > 0) setChordLength(l)
-  }
-
-  function reset() {
-    setDiameter(null)
-    setChordLength(null)
-    setChordAngle(30)
-  }
-
+export default function HomePage() {
   return (
     <main className="min-h-screen bg-background">
-      {/* header */}
-      <header className="border-b border-border px-4 py-3 flex items-center justify-between">
-        <h1 className="text-base font-semibold text-foreground">Circle Tool</h1>
-        <div className="flex items-center gap-1">
-          <Button
-            variant={chatOpen ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setChatOpen(!chatOpen)}
-            className={chatOpen ? "" : "text-muted-foreground"}
+      {/* ticker */}
+      <FeatureTicker />
+
+      {/* hero */}
+      <section className="px-4 py-8 md:py-12 max-w-4xl mx-auto text-center">
+        <h1 className="text-2xl md:text-4xl font-bold text-balance text-foreground leading-tight">
+          A circle geometry tool with an AI agent built in
+        </h1>
+        <p className="mt-2 text-muted-foreground text-sm md:text-base max-w-2xl mx-auto text-pretty">
+          Canvas rendering, live geometry computation, export, and natural-language control via Claude. Fork it and build on it.
+        </p>
+        <div className="mt-5 flex items-center justify-center gap-3">
+          <Link
+            href="/tool"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-lg px-5 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
           >
-            <MessageCircle className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Chat</span>
-          </Button>
-          {hasCircle && (
-            <Button variant="ghost" size="sm" onClick={() => setExportOpen(true)} className="text-muted-foreground">
-              <Download className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-          )}
-          {hasCircle && (
-            <Button variant="ghost" size="sm" onClick={() => setCopyOpen(true)} className="text-muted-foreground">
-              <Copy className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Copy</span>
-            </Button>
-          )}
-          {hasCircle && (
-            <Button variant="ghost" size="sm" onClick={reset} className="text-muted-foreground">
-              Reset
-            </Button>
-          )}
+            Open the tool <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-      </header>
+      </section>
 
-      <div className="relative h-[calc(100vh-53px)] overflow-hidden">
-        {/* chat sidebar - left, absolutely positioned */}
-        <div
-          className={`absolute top-0 left-0 h-full w-80 lg:w-96 border-r border-border flex flex-col transition-transform duration-300 ease-in-out z-10 bg-background ${
-            chatOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <div className="h-full p-4 flex flex-col">
-            <ChatPanel
-              geometryState={{ diameter, chordLength, chordAngle }}
-              onSetCircle={(d) => {
-                setDiameter(d)
-                setDiameterInput(String(d))
-                if (chordLength && chordLength > d) {
-                  setChordLength(null)
-                }
-              }}
-              onSetLine={(length, angle) => {
-                setChordLength(length)
-                setChordInput(String(length))
-                if (angle !== null) setChordAngle(angle)
-              }}
-              onRemoveCircle={() => {
-                setDiameter(null)
-                setChordLength(null)
-                setChordAngle(30)
-              }}
-              onRemoveLine={() => {
-                setChordLength(null)
-              }}
-            />
+      {/* thumbnail carousel */}
+      <section className="px-4 max-w-4xl mx-auto pb-10">
+        <ThumbnailCarousel />
+      </section>
+
+      {/* feature cards */}
+      <section className="px-4 max-w-4xl mx-auto pb-12">
+        <h2 className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+          What{"'"}s in the box
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f) => (
+            <Link
+              key={f.title}
+              href={f.href}
+              className="group border border-border rounded-lg p-4 flex flex-col gap-2 hover:border-foreground/20 transition-colors bg-card"
+            >
+              <div className="flex items-center gap-2">
+                <f.icon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">{f.title}</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* tech stack + brand assets */}
+      <section className="px-4 max-w-4xl mx-auto pb-12 flex flex-col md:flex-row gap-8">
+        <div className="flex-1">
+          <h2 className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            Tech Stack
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {DEPS.map((d) => (
+              <span
+                key={d}
+                className="text-xs font-mono px-2.5 py-1 rounded-full border border-border text-muted-foreground bg-card"
+              >
+                {d}
+              </span>
+            ))}
           </div>
         </div>
-
-        {/* main content - shifts right when chat is open */}
-        <div
-          className={`h-full flex flex-col lg:flex-row transition-all duration-300 ease-in-out ${
-            chatOpen ? "ml-80 lg:ml-96" : "ml-0"
-          }`}
-        >
-          <div className="flex-1 p-4 min-w-0">
-            <CircleCanvas diameter={diameter} chordLength={chordLength} chordAngle={chordAngle} />
+        <div className="md:w-64">
+          <h2 className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            Brand Assets
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {BRAND_ASSETS.map((a) => (
+              <Link
+                key={a.label}
+                href={a.href}
+                className="text-xs font-mono px-2.5 py-1 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors bg-card"
+              >
+                {a.label}
+              </Link>
+            ))}
+            <Link
+              href="/brand-assets"
+              className="text-xs font-mono px-2.5 py-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              View All &rarr;
+            </Link>
           </div>
-
-        {/* sidebar */}
-        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border p-4 flex flex-col gap-6 overflow-y-auto">
-          {/* add circle */}
-          <section className="flex flex-col gap-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {hasCircle ? "Circle" : "Add a Circle"}
-            </h2>
-            <div className="flex items-end gap-2">
-              <div className="flex-1 flex flex-col gap-1.5">
-                <Label htmlFor="diameter" className="text-xs text-muted-foreground">
-                  Diameter
-                </Label>
-                <Input
-                  id="diameter"
-                  type="number"
-                  min={1}
-                  value={diameterInput}
-                  onChange={(e) => setDiameterInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addCircle()}
-                />
-              </div>
-              <Button size="sm" onClick={addCircle}>
-                {hasCircle ? "Update" : "Add"}
-              </Button>
-            </div>
-          </section>
-
-          {/* add chord / line */}
-          {hasCircle && (
-            <section className="flex flex-col gap-3">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {hasChord ? "Chord / Line" : "Add a Line"}
-              </h2>
-              <div className="flex items-end gap-2">
-                <div className="flex-1 flex flex-col gap-1.5">
-                  <Label htmlFor="chord" className="text-xs text-muted-foreground">
-                    Length
-                  </Label>
-                  <Input
-                    id="chord"
-                    type="number"
-                    min={1}
-                    max={diameter ?? undefined}
-                    value={chordInput}
-                    onChange={(e) => {
-                      setChordInput(e.target.value)
-                      if (hasChord) {
-                        const l = Number(e.target.value)
-                        if (l > 0) setChordLength(l)
-                      }
-                    }}
-                    onKeyDown={(e) => e.key === "Enter" && addLine()}
-                  />
-                </div>
-                <Button size="sm" onClick={addLine}>
-                  {hasChord ? "Update" : "Add"}
-                </Button>
-              </div>
-
-              {hasChord && (
-                <>
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      Length: {chordLength}
-                    </Label>
-                    <Slider
-                      min={1}
-                      max={diameter ?? 200}
-                      step={1}
-                      value={[chordLength ?? 1]}
-                      onValueChange={([v]) => {
-                        setChordLength(v)
-                        setChordInput(String(v))
-                      }}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      Angle: {chordAngle}&deg;
-                    </Label>
-                    <Slider
-                      min={0}
-                      max={360}
-                      step={1}
-                      value={[chordAngle]}
-                      onValueChange={([v]) => setChordAngle(v)}
-                    />
-                  </div>
-                </>
-              )}
-            </section>
-          )}
-
-          {/* computed data */}
-          <section className="flex flex-col gap-2">
-            <GeometryData diameter={diameter} chordLength={chordLength} chordAngle={chordAngle} />
-          </section>
-        </aside>
         </div>
-      </div>
-      {hasCircle && (
-        <ExportModal
-          open={exportOpen}
-          onOpenChange={setExportOpen}
-          diameter={diameter}
-          chordLength={chordLength}
-          chordAngle={chordAngle}
-        />
-      )}
-      <Dialog open={copyOpen} onOpenChange={setCopyOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Copy Data</DialogTitle>
-            <DialogDescription>Preview and copy geometry data as JSON or CSV.</DialogDescription>
-          </DialogHeader>
-          <Tabs defaultValue="json" onValueChange={() => setCopied(false)}>
-            <div className="flex items-center justify-between">
-              <TabsList>
-                <TabsTrigger value="json">JSON</TabsTrigger>
-                <TabsTrigger value="csv">CSV</TabsTrigger>
-              </TabsList>
+      </section>
+
+      {/* explore cards */}
+      <section className="px-4 max-w-4xl mx-auto pb-16">
+        <h2 className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+          Explore
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/tool"
+            className="group border border-border rounded-lg p-6 flex flex-col gap-2 hover:border-foreground/20 transition-colors bg-card"
+          >
+            <div className="flex items-center gap-2">
+              <Circle className="h-5 w-5 text-foreground" />
+              <span className="text-base font-semibold text-foreground">Circle Tool</span>
             </div>
-            <TabsContent value="json">
-              <pre className="rounded-md border border-border bg-muted/50 p-3 text-xs font-mono overflow-auto max-h-64">
-                {jsonPreview}
-              </pre>
-              <Button
-                size="sm"
-                className="mt-3 w-full"
-                onClick={() => copyToClipboard(jsonPreview)}
-              >
-                {copied ? <><Check className="h-4 w-4 mr-1" /> Copied</> : <><Copy className="h-4 w-4 mr-1" /> Copy JSON</>}
-              </Button>
-            </TabsContent>
-            <TabsContent value="csv">
-              <pre className="rounded-md border border-border bg-muted/50 p-3 text-xs font-mono overflow-auto max-h-64">
-                {csvPreview}
-              </pre>
-              <Button
-                size="sm"
-                className="mt-3 w-full"
-                onClick={() => copyToClipboard(csvPreview)}
-              >
-                {copied ? <><Check className="h-4 w-4 mr-1" /> Copied</> : <><Copy className="h-4 w-4 mr-1" /> Copy CSV</>}
-              </Button>
-            </TabsContent>
-          </Tabs>
-        </DialogContent>
-      </Dialog>
+            <p className="text-sm text-muted-foreground">
+              The interactive editor. Draw circles, add chords, compute geometry, and talk to the AI agent.
+            </p>
+            <span className="text-xs text-muted-foreground group-hover:text-foreground mt-1 flex items-center gap-1 transition-colors">
+              Open <ArrowRight className="h-3 w-3" />
+            </span>
+          </Link>
+          <Link
+            href="/brand-assets"
+            className="group border border-border rounded-lg p-6 flex flex-col gap-2 hover:border-foreground/20 transition-colors bg-card"
+          >
+            <div className="flex items-center gap-2">
+              <Image className="h-5 w-5 text-foreground" />
+              <span className="text-base font-semibold text-foreground">Brand Assets</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Thumbnails, OG images, favicons, and touch icons. All generated from the app{"'"}s design tokens.
+            </p>
+            <span className="text-xs text-muted-foreground group-hover:text-foreground mt-1 flex items-center gap-1 transition-colors">
+              View <ArrowRight className="h-3 w-3" />
+            </span>
+          </Link>
+        </div>
+      </section>
     </main>
   )
 }

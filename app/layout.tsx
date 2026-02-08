@@ -8,8 +8,9 @@ const _geist = Geist({ subsets: ['latin'] })
 const _geistMono = Geist_Mono({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Circle Tool',
-  description: 'Interactive geometry tool for circle and chord analysis',
+  title: 'Circle Tool - Geometry Editor with AI Agent',
+  description:
+    'Interactive circle geometry tool with canvas rendering, live computation, and an AI chatbot (Claude Opus 4.5) that controls the diagram via natural language.',
 }
 
 export default function RootLayout({

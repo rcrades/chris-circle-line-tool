@@ -195,7 +195,7 @@ function TickerCard({
 
 export function FeatureTicker() {
   return (
-    <div className="relative w-full overflow-hidden border-y border-border bg-card/50 py-4">
+    <div className="relative w-full overflow-hidden border-y border-border bg-card/50 py-4" style={{ contain: "paint" }}>
       {/* fade masks */}
       <div className="absolute inset-y-0 left-0 w-16 z-10 bg-gradient-to-r from-background to-transparent pointer-events-none" />
       <div className="absolute inset-y-0 right-0 w-16 z-10 bg-gradient-to-l from-background to-transparent pointer-events-none" />

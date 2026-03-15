@@ -105,7 +105,7 @@ export default function Page() {
         </div>
       </header>
 
-      <div className="relative h-[calc(100vh-53px)] overflow-hidden">
+      <div className="relative overflow-hidden lg:h-[calc(100vh-53px)]">
         {/* chat sidebar - left, absolutely positioned */}
         <div
           className={`absolute top-0 left-0 h-full w-80 lg:w-96 border-r border-border flex flex-col transition-transform duration-300 ease-in-out z-10 bg-background ${
@@ -141,16 +141,16 @@ export default function Page() {
 
         {/* main content - shifts right when chat is open */}
         <div
-          className={`h-full flex flex-col lg:flex-row transition-all duration-300 ease-in-out ${
-            chatOpen ? "ml-80 lg:ml-96" : "ml-0"
+          className={`flex flex-col lg:flex-row lg:h-full transition-all duration-300 ease-in-out ${
+            chatOpen ? "lg:ml-80 lg:ml-96" : "ml-0"
           }`}
         >
-          <div className="flex-1 p-4 min-w-0">
+          <div className="h-[40vh] lg:flex-1 lg:h-auto p-4 min-w-0">
             <CircleCanvas diameter={diameter} chordLength={chordLength} chordAngle={chordAngle} />
           </div>
 
         {/* sidebar */}
-        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border p-4 flex flex-col gap-6 overflow-y-auto">
+        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-border p-4 flex flex-col gap-6 overflow-y-auto lg:h-full">
           {/* add circle */}
           <section className="flex flex-col gap-3">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
